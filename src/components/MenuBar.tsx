@@ -13,9 +13,7 @@ const MenuBar: React.SFC<MenuBarProps> = () => {
   return (
     <nav className="menubar">
       <ul className="menulist">
-        <li>
-          <div className="banner">My Portofolio</div>
-        </li>
+        <li className="banner">My Portofolio</li>
         <li className={buildClass("/vidly")}>
           <Link to="/vidly">Vidly</Link>
         </li>
