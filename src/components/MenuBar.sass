@@ -1,0 +1,75 @@
+// component header colors
+$hd-normal: #004699
+$hd-light: #4e71ca
+$hd-dark: #00206a
+$hd-color: white
+
+// component background colors
+$bg-normal: #eeeeee
+$bg-light: #ffffff
+$bg-dark: #bcbcbc
+$bg-color: dark
+
+// interactive component colors
+$ui-normal: #4a148c
+$ui-light: #7c43bd
+$ui-dark: #12005e
+$ui-color: white
+
+.menubar
+    position: fixed
+    top: 0
+    background-color: $bg-normal
+    width: 8rem
+    height: 100vh
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)
+
+    header
+        background-color: $hd-light
+        color: $hd-color
+        padding: 0.5rem
+        text-align: center
+        vertical-align: middle
+        margin-bottom: 1.5rem
+        border-bottom: 0.3rem solid $hd-dark
+        font-weight: bold
+
+    .menulist
+        list-style: none
+        margin: 0
+        padding: 0
+        height: 100%
+        display: flex
+        flex-direction: column
+
+        .menuitem
+            width: 85%
+            text-align: center
+            background-color: $ui-light
+            color: $ui-color
+            margin: auto
+            margin-top: 0
+            margin-bottom: 1.5rem
+            padding: 0.25rem
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)
+            transition: all 0.3s ease-in-out
+            filter: opacity(0.4)
+            border-radius: 50%
+
+            a
+                color: $ui-color
+                text-decoration: none
+                width: 100%
+                display: inline-block
+
+            &:last-child
+                margin-top: auto
+
+            &:active
+                filter: opacity(1)
+                background-color: $ui-dark
+
+        .menuitem-active, .menuitem:hover
+            box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)
+            border-radius: 15%
+            filter: opacity(0.8)
