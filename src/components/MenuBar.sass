@@ -20,11 +20,11 @@ $ui-color: white
     position: fixed
     top: 0
     background-color: $bg-normal
-    width: 8rem
+    width: 6rem
     height: 100vh
     box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)
 
-    header
+    .banner
         background-color: $hd-light
         color: $hd-color
         padding: 0.5rem
@@ -53,8 +53,8 @@ $ui-color: white
             padding: 0.25rem
             box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)
             transition: all 0.3s ease-in-out
-            filter: opacity(0.4)
-            border-radius: 50%
+            filter: opacity(0.6)
+            border-radius: 60%
 
             a
                 color: $ui-color
@@ -71,5 +71,7 @@ $ui-color: white
 
         .menuitem-active, .menuitem:hover
             box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)
-            border-radius: 15%
-            filter: opacity(0.8)
+            filter: opacity(1)
+
+        .menuitem-active
+            border-radius: 10%
