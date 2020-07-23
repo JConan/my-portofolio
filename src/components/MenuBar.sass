@@ -1,77 +1,23 @@
-// component header colors
-$hd-normal: #004699
-$hd-light: #4e71ca
-$hd-dark: #00206a
-$hd-color: white
+header
+    display: flex
+    flex-direction: column
 
-// component background colors
-$bg-normal: #eeeeee
-$bg-light: #ffffff
-$bg-dark: #bcbcbc
-$bg-color: dark
+    nav
+        background-color: #f5f5f7
+        box-shadow: 4px 5px 10px rgba(0,0,0,0.44)
+        &:first-child
+            width: 10rem
+        &:last-child
+            position: fixed
+            left: 10rem
+            width: calc( 100% - 10rem)
+        svg
+            transform: scale(1.5)
 
-// interactive component colors
-$ui-normal: #4a148c
-$ui-light: #7c43bd
-$ui-dark: #12005e
-$ui-color: white
+        .menulink-active
+            font-weight: bold
 
-.menubar
-    position: fixed
-    top: 0
-    background-color: $bg-normal
-    width: 6rem
-    height: 100vh
-    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)
-
-    .banner
-        background-color: $hd-light
-        color: $hd-color
-        padding: 0.5rem
-        text-align: center
-        vertical-align: middle
-        margin-bottom: 1.5rem
-        border-bottom: 0.3rem solid $hd-dark
-        font-weight: bold
-
-    .menulist
-        list-style: none
-        margin: 0
-        padding: 0
-        height: 100%
-        display: flex
-        flex-direction: column
-
-        .menuitem
-            width: 85%
-            text-align: center
-            background-color: $ui-light
-            color: $ui-color
-            margin: auto
-            margin-top: 0
-            margin-bottom: 1.5rem
-            padding: 0.25rem
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)
-            transition: all 0.3s ease-in-out
-            filter: opacity(0.6)
-            border-radius: 60%
-
-            a
-                color: $ui-color
-                text-decoration: none
-                width: 100%
-                display: inline-block
-
-            &:last-child
-                margin-top: auto
-
-            &:active
-                filter: opacity(1)
-                background-color: $ui-dark
-
-        .menuitem-active, .menuitem:hover
-            box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)
-            filter: opacity(1)
-
-        .menuitem-active
-            border-radius: 10%
+        a
+            display: flex
+            svg
+                transform: scale(1.5)
