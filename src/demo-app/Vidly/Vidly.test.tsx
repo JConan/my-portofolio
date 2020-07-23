@@ -17,19 +17,19 @@ describe('vidly table content', () => {
     })
 
     it('should have a like button that can be toggled', () => {
-        let button = screen.queryAllByRole('likeButton')[0]
+        let button = screen.queryAllByRole('button', { name: 'like button' })[0]
         expect(button).not.toBeUndefined()
-        expect(button.children[0]).not.toHaveClass('liked')
+        expect(button).not.toHaveAttribute('aria-pressed', 'true')
 
         button.click()
-        expect(button.children[0]).toHaveClass('liked')
+        expect(button).toHaveAttribute('aria-pressed', 'true')
 
         button.click()
-        expect(button.children[0]).not.toHaveClass('liked')
+        expect(button).not.toHaveAttribute('aria-pressed', 'true')
     })
 
     it('should have a delete button that remove row line', () => {
-        let button = screen.queryAllByRole('deleteButton')[0]
+        let button = screen.queryAllByRole('button', { name: 'delete button' })[0]
         expect(button).not.toBeUndefined()
 
         let row = button.closest('tr')

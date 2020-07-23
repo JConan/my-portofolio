@@ -58,7 +58,7 @@ const Vidly: React.SFC<VidlyProps> = () => {
                             <td>{movie.stock}</td>
                             <td>{movie.rate}</td>
                             <td className="buttons">
-                                <span role="likeButton" className="likeButton" onClick={() => likeButtonToggler(movie.id)}>
+                                <span aria-label="like button" aria-pressed={movie.liked} role="button" className="likeButton" onClick={() => likeButtonToggler(movie.id)}>
                                     {
                                         movie.liked ?
                                             <Icons.HeartFill className="liked" color={"darkred"} />
@@ -66,7 +66,7 @@ const Vidly: React.SFC<VidlyProps> = () => {
                                             <Icons.Heart color={"darkred"} />
                                     }
                                 </span>
-                                <span role="deleteButton" className="deleteButton" onClick={() => deleteButton(movie.id)}>
+                                <span aria-label="delete button" role="button" className="deleteButton" onClick={() => deleteButton(movie.id)}>
                                     <Icons.Trash color="darkred" />
                                 </span>
                             </td>
