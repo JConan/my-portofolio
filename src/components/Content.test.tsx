@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { createBrowserHistory } from "history";
 import { Router } from "react-router-dom";
 import Content from "./Content";
@@ -13,7 +13,6 @@ describe("Route in Content page", () => {
       </Router>
     );
   });
-  afterEach(cleanup);
 
   it("should be able to display Vidly content page", () => {
     history.push("/vidly");
