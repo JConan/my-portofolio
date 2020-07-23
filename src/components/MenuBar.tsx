@@ -1,5 +1,5 @@
 import React, { SFC } from "react";
-import { Link, useLocation, Switch, Route } from "react-router-dom";
+import { Link, useLocation, Switch, Route, Redirect } from "react-router-dom";
 import * as Icons from "react-bootstrap-icons";
 import "./MenuBar.sass";
 
@@ -17,6 +17,7 @@ const MenuBar: SFC<MenuBarProps> = () => {
       </MainMenu>
       <SecondMenu name={name}>
         <Switch>
+          <Redirect exact path="/vidly" to="/vidly/movie" />
           <Route path="/vidly">
             <MenuLink name="Movie" to="/vidly/movie" />
             <MenuLink name="Customers" to="/vidly/customers" />
@@ -68,7 +69,7 @@ const MenuLink: SFC<MenuLinkProps> = (props) => {
 
 const MainMenu: SFC<{}> = (props) => {
   return (
-    <nav className="navbar navbar-light">
+    <nav id="main-menu" className="navbar navbar-light">
       <div className="container">
         <button
           id="main-menutoggler"
@@ -95,7 +96,7 @@ const MainMenu: SFC<{}> = (props) => {
 
 const SecondMenu: SFC<{ name: string }> = (props) => {
   return (
-    <nav className="navbar navbar-expand-sm navbar-light">
+    <nav id="second-menu" className="navbar navbar-expand-sm navbar-light">
       <div className="container-fluid">
         <b
           className="navbar-brand"

@@ -34,7 +34,7 @@ describe("MenuBar provide navigation items", () => {
 
     expect(links[0]).not.toHaveClass("active");
     links[0].click();
-    expect(history.location.pathname).toEqual("/vidly");
+    expect(history.location.pathname).toEqual("/vidly/movie");
     expect(links[0]).toHaveClass("active");
   });
 
