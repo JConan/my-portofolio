@@ -2,11 +2,18 @@
 table th, table td
     text-align: center
 
-table td .likeButton
+table
+    .buttons
+        display: flex
+        width: 5rem
+        margin: auto
+    td
+        span
+            margin: auto
 
-    svg
-        transition: transform .2s
+            svg
+                transition: transform .2s
 
-    &:hover
-        svg
-            transform: scale(1.5)
+            &:hover
+                svg
+                    transform: scale(1.5)

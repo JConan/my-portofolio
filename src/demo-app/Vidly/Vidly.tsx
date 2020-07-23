@@ -34,6 +34,9 @@ const Vidly: React.SFC<VidlyProps> = () => {
     let likeButtonToggler = (movieId: string) => {
         setMovies(movies.map(movie => movie.id === movieId ? { ...movie, liked: !movie.liked } : movie))
     }
+    let deleteButton = (movieId: string) => {
+        setMovies(movies.filter(movie => movie.id !== movieId))
+    }
 
     return (
         <table className="table">
@@ -54,14 +57,17 @@ const Vidly: React.SFC<VidlyProps> = () => {
                             <td>{movie.genre}</td>
                             <td>{movie.stock}</td>
                             <td>{movie.rate}</td>
-                            <td>
-                                <span className="likeButton" onClick={() => likeButtonToggler(movie.id)}>
+                            <td className="buttons">
+                                <span role="likeButton" className="likeButton" onClick={() => likeButtonToggler(movie.id)}>
                                     {
                                         movie.liked ?
-                                            <Icons.HeartFill color={"darkred"} />
+                                            <Icons.HeartFill className="liked" color={"darkred"} />
                                             :
                                             <Icons.Heart color={"darkred"} />
                                     }
+                                </span>
+                                <span role="deleteButton" className="deleteButton" onClick={() => deleteButton(movie.id)}>
+                                    <Icons.Trash color="darkred" />
                                 </span>
                             </td>
                         </tr>
