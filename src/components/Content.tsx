@@ -3,8 +3,9 @@ import { Switch, Route } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import HomePage from "./Home.md";
 import "./Content.sass";
+import Vidly from "../demo-app/Vidly/Vidly";
 
-export interface ContentProps {}
+export interface ContentProps { }
 
 const Content: React.SFC<ContentProps> = (props) => {
   let [homeContent, setHomeContent] = React.useState("");
@@ -22,6 +23,7 @@ const Content: React.SFC<ContentProps> = (props) => {
           <span style={{ visibility: "hidden", display: "none" }}>
             vidly content page
           </span>
+          <Vidly />
         </Route>
         <Route path="/">
           <span style={{ visibility: "hidden", display: "none" }}>
