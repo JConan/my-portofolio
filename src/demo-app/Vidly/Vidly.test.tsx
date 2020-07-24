@@ -1,10 +1,18 @@
 import * as React from "react";
 import { render, cleanup, screen } from "@testing-library/react";
 import Vidly from "./Vidly";
+import { Router } from "react-router-dom";
+import { createBrowserHistory } from "history";
 
 describe("vidly table content", () => {
+  let history = createBrowserHistory();
   beforeEach(() => {
-    render(<Vidly />);
+    history.push("/vidly/movie");
+    render(
+      <Router history={history}>
+        <Vidly />
+      </Router>
+    );
   });
   afterEach(cleanup);
 
@@ -34,5 +42,12 @@ describe("vidly table content", () => {
     let row = button.closest("tr");
     button.click();
     expect(row).not.toBeInTheDocument();
+  });
+
+  it("should display customers page", () => {
+    ["customers", "rentals", "login", "register"].forEach((pageName) => {
+      history.push("/vidly/" + pageName);
+      screen.getByText(new RegExp(pageName + " page", "i"));
+    });
   });
 });

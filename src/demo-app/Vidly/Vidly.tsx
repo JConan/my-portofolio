@@ -2,12 +2,12 @@ import * as React from "react";
 import { getMovies } from "./services/fakeMovieService";
 import MovieTable, { Movie } from "./components/MovieTable";
 import "./Vidly.sass";
+import { Switch, Route } from "react-router-dom";
 
 export interface VidlyProps {}
 
 const Vidly: React.SFC<VidlyProps> = () => {
   let [movies, setMovies] = React.useState<Array<Movie>>([]);
-
   React.useEffect(() => {
     setMovies(
       getMovies().map((movie) => ({
@@ -32,11 +32,21 @@ const Vidly: React.SFC<VidlyProps> = () => {
   };
 
   return (
-    <MovieTable
-      movies={movies}
-      onMovieDelete={deleteButton}
-      onMovieLike={likeButtonToggler}
-    />
+    <React.Fragment>
+      <Switch>
+        <Route path="/vidly/movie">
+          <MovieTable
+            movies={movies}
+            onMovieDelete={deleteButton}
+            onMovieLike={likeButtonToggler}
+          />
+        </Route>
+        <Route path="/vidly/customers">Customers Page</Route>
+        <Route path="/vidly/rentals">Rentals Page</Route>
+        <Route path="/vidly/login">Login Page</Route>
+        <Route path="/vidly/register">Register Page</Route>
+      </Switch>
+    </React.Fragment>
   );
 };
 
