@@ -14,6 +14,7 @@
     "@types/react": "^16.9.43",
     "@types/react-dom": "^16.9.8",
     "@types/react-router-dom": "^5.1.5",
+    "axios": "^0.19.2",
     "bootstrap": "^5.0.0-alpha1",
     "lodash": "^4.17.19",
     "node-sass": "^4.14.1",

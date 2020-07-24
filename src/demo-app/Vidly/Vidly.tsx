@@ -1,14 +1,18 @@
 import * as React from "react";
 import { getMovies } from "./services/fakeMovieService";
 import MovieTable, { Movie } from "./components/MovieTable";
-import "./Vidly.sass";
 import { Switch, Route } from "react-router-dom";
+import axios from "axios";
+import "./Vidly.sass";
 
 export interface VidlyProps {}
 
 const Vidly: React.SFC<VidlyProps> = () => {
   let [movies, setMovies] = React.useState<Array<Movie>>([]);
+  let [message, setMessage] = React.useState("");
   React.useEffect(() => {
+    axios.get("/api").then((response) => setMessage(response.data));
+
     setMovies(
       getMovies().map((movie) => ({
         id: movie._id,
@@ -33,6 +37,7 @@ const Vidly: React.SFC<VidlyProps> = () => {
 
   return (
     <React.Fragment>
+      <div>{message}</div>
       <Switch>
         <Route path="/vidly/movie">
           <MovieTable
