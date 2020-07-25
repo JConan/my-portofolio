@@ -10,7 +10,7 @@
   },
   "scripts": {
     "start": "node server",
-    "build": "cd react-ui/ && npm install && npm run build",
+    "build": "cd react-ui/ && yarn install && yarn build",
     "start:ui": "cd react-ui/ && yarn start",
     "start:server": "nodemon",
     "dev": "concurrently \"yarn start:server\" \"yarn start:ui\"",

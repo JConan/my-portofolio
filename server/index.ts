@@ -8,6 +8,7 @@ const numCPUs = require("os").cpus().length;
 
 const isDev = process.env.NODE_ENV !== "production";
 const PORT = process.env.PORT || 5000;
+const INCLUDE_REACT_UI = process.env.INCLUDE_REACT_UI !== undefined;
 
 // Multi-process to utilize all CPU cores.
 if (!isDev && cluster.isMaster) {
@@ -25,7 +26,14 @@ if (!isDev && cluster.isMaster) {
   );
 } else {
   const app = express();
+
+  // security package in production
+  !isDev && app.use(require("helmet")());
+
+  // logging
   app.use(morgan("combined"));
+
+  // external redirection
   app.use(
     "/api/todos",
     createProxyMiddleware({
@@ -35,17 +43,16 @@ if (!isDev && cluster.isMaster) {
     })
   );
 
-  if (!isDev) {
-    // security package
-    app.use(require("helmet")());
-
-    // PRODUCTION : serve 'react-ui'
+  // serve 'react-ui' with this express app
+  if (INCLUDE_REACT_UI) {
     app.use(express.static(path.join(__dirname, "../react-ui/build")));
     app.get("/", function (_req: any, res: { sendFile: (arg0: any) => void }) {
       res.sendFile(path.join(__dirname, "../react-uibuild", "index.html"));
     });
+    console.log("react-ui loaded");
   }
 
+  // start app
   app.listen(PORT, function () {
     console.error(
       `Node ${
