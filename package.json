@@ -1,13 +1,21 @@
 {
-  "name": "heroku-cra-node",
-  "version": "3.0.0",
-  "description": "How to use create-react-app with a custom Node API on Heroku",
+  "name": "my-portofolio-server",
+  "version": "0.0.1",
+  "private": true,
+  "description": "my own project as a showcase",
   "engines": {
-    "node": "12.x"
+    "node": "12.18.x",
+    "npm": "6.14.x",
+    "yarn": "1.22.x"
   },
   "scripts": {
     "start": "node server",
-    "build": "cd react-ui/ && npm install && npm run build"
+    "build": "cd react-ui/ && npm install && npm run build",
+    "start:ui": "cd react-ui/ && yarn start",
+    "start:server": "nodemon server",
+    "dev": "concurrently \"yarn start:server\" \"yarn start:ui\"",
+    "install": "cd react-ui && yarn install",
+    "install:check": "yarn install --ignore-platform --check-files && cd react-ui && yarn install --ignore-platform --check-files"
   },
   "cacheDirectories": [
     "node_modules",
@@ -16,23 +24,14 @@
   "dependencies": {
     "@types/morgan": "^1.9.1",
     "express": "^4.16.4",
+    "helmet": "^3.23.3",
     "http-proxy-middleware": "^1.0.5",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.4",
     "typescript": "^3.9.7"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/JConan/my-portofolio.git"
-  },
-  "keywords": [
-    "node",
-    "heroku",
-    "create-react-app",
-    "react"
-  ],
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^5.2.0"
+    "concurrently": "^5.2.0",
+    "nodemon": "^2.0.4"
   }
 }
