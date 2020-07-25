@@ -11,7 +11,17 @@ const Vidly: React.SFC<VidlyProps> = () => {
   let [movies, setMovies] = React.useState<Array<Movie>>([]);
   let [message, setMessage] = React.useState("");
   React.useEffect(() => {
-    axios.get("/api").then((response) => setMessage(response.data));
+    interface Todo {
+      title: string;
+      completed: boolean;
+    }
+
+    axios
+      .get<Todo>("/api/todos/1")
+      .then(({ data: todo }) =>
+        setMessage(`todo [${todo.title}] is ${todo.completed}`)
+      )
+      .catch((err) => setMessage(err));
 
     setMovies(
       getMovies().map((movie) => ({

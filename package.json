@@ -1,56 +1,38 @@
 {
-  "name": "my-portofolio",
-  "version": "0.2.0",
-  "private": true,
-  "dependencies": {
-    "@testing-library/dom": "^7.21.4",
-    "@testing-library/jest-dom": "^5.11.1",
-    "@testing-library/react": "^10.4.7",
-    "@testing-library/user-event": "^12.0.11",
-    "@types/jest": "^26.0.5",
-    "@types/lodash": "^4.14.158",
-    "@types/node": "^14.0.24",
-    "@types/popper.js": "^1.11.0",
-    "@types/react": "^16.9.43",
-    "@types/react-dom": "^16.9.8",
-    "@types/react-router-dom": "^5.1.5",
-    "axios": "^0.19.2",
-    "bootstrap": "^5.0.0-alpha1",
-    "lodash": "^4.17.19",
-    "node-sass": "^4.14.1",
-    "popper.js": "^1.16.1",
-    "react": "^16.13.1",
-    "react-bootstrap-icons": "^1.0.3-alpha5",
-    "react-dom": "^16.13.1",
-    "react-markdown": "^4.3.1",
-    "react-router-dom": "^5.2.0",
-    "react-scripts": "3.4.1",
-    "typescript": "^3.9.7"
-  },
+  "name": "heroku-cra-node",
+  "version": "3.0.0",
+  "description": "How to use create-react-app with a custom Node API on Heroku",
   "engines": {
-    "node": "12.18.x",
-    "npm": "6.14.x",
-    "yarn": "1.22.x"
+    "node": "12.x"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "node server",
+    "build": "cd react-ui/ && npm install && npm run build"
   },
-  "eslintConfig": {
-    "extends": "react-app"
+  "cacheDirectories": [
+    "node_modules",
+    "react-ui/node_modules"
+  ],
+  "dependencies": {
+    "@types/morgan": "^1.9.1",
+    "express": "^4.16.4",
+    "http-proxy-middleware": "^1.0.5",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.4",
+    "typescript": "^3.9.7"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JConan/my-portofolio.git"
+  },
+  "keywords": [
+    "node",
+    "heroku",
+    "create-react-app",
+    "react"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^5.2.0"
   }
 }
