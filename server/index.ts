@@ -15,18 +15,21 @@ if (!isDev && cluster.isMaster) {
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork();
   }
-  cluster.on("exit", (worker, code, signal) => {
-    console.error(
-      `Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`
-    );
-  });
+  cluster.on(
+    "exit",
+    (worker: { process: { pid: any } }, code: any, signal: any) => {
+      console.error(
+        `Node cluster worker ${worker.process.pid} exited: code ${code}, signal ${signal}`
+      );
+    }
+  );
 } else {
   const app = express();
   app.use(morgan("combined"));
   app.use(
     "/api/todos",
     createProxyMiddleware({
-      pathRewrite: (p) => p.replace(/^\/api\/todos\/(.*)/, "/todos/$1"),
+      pathRewrite: (p: string) => p.replace(/^\/api\/todos\/(.*)/, "/todos/$1"),
       target: "https://jsonplaceholder.typicode.com",
       changeOrigin: true,
     })
@@ -38,7 +41,7 @@ if (!isDev && cluster.isMaster) {
 
     // PRODUCTION : serve 'react-ui'
     app.use(express.static(path.join(__dirname, "../react-ui/build")));
-    app.get("/", function (req, res) {
+    app.get("/", function (_req: any, res: { sendFile: (arg0: any) => void }) {
       res.sendFile(path.join(__dirname, "../react-uibuild", "index.html"));
     });
   }
@@ -51,3 +54,5 @@ if (!isDev && cluster.isMaster) {
     );
   });
 }
+
+export {};
