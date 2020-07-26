@@ -1,13 +1,10 @@
-const morgan = require("morgan");
-const express = require("express");
-const { createProxyMiddleware } = require("http-proxy-middleware");
+import { App } from "./App";
+import cluster from "cluster";
 
-const path = require("path");
-const cluster = require("cluster");
-const numCPUs = require("os").cpus().length;
+const numCPUs = 2; //require("os").cpus().length;
 
 const isDev = process.env.NODE_ENV !== "production";
-const PORT = process.env.PORT || 5000;
+const PORT = (process.env.PORT && Number.parseInt(process.env.PORT)) || 5000;
 const INCLUDE_REACT_UI = process.env.INCLUDE_REACT_UI !== undefined;
 
 // Multi-process to utilize all CPU cores.
@@ -25,41 +22,24 @@ if (!isDev && cluster.isMaster) {
     }
   );
 } else {
-  const app = express();
-
-  // security package in production
-  !isDev && app.use(require("helmet")());
-
-  // logging
-  app.use(morgan("combined"));
-
-  // external redirection
-  app.use(
-    "/api/todos",
-    createProxyMiddleware({
-      pathRewrite: (p: string) => p.replace(/^\/api\/todos\/(.*)/, "/todos/$1"),
-      target: "https://jsonplaceholder.typicode.com",
-      changeOrigin: true,
-    })
-  );
-
-  // serve 'react-ui' with this express app
-  if (INCLUDE_REACT_UI) {
-    app.use(express.static(path.join(__dirname, "../react-ui/build")));
-    app.get("/", function (_req: any, res: { sendFile: (arg0: any) => void }) {
-      res.sendFile(path.join(__dirname, "../react-uibuild", "index.html"));
-    });
-    console.log("react-ui loaded");
-  }
-
-  // start app
-  app.listen(PORT, function () {
-    console.error(
-      `Node ${
-        isDev ? "dev server" : "cluster worker " + process.pid
-      }: listening on port ${PORT}`
-    );
+  const app = App({
+    port: PORT,
+    isDev,
+    httpProxies: {
+      "Proxy to JsonPlaceHolder Todos API": {
+        "/api/todos": {
+          pathRewrite: (p: string) =>
+            p.replace(/^\/api\/todos\/(.*)/, "/todos/$1"),
+          target: "https://jsonplaceholder.typicode.com",
+          changeOrigin: true,
+        },
+      },
+    },
+    serverStaticDirectories: {
+      "/": "../react-ui/build",
+    },
   });
+  app.start();
 }
 
 export {};
