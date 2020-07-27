@@ -1,7 +1,7 @@
 import { Express, Router } from "express";
 import { logger } from "./system";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import { Hello } from "./routes/hello";
+import { Hello } from "@:app.routes/hello";
 
 /**
  * configuration for static folder

@@ -18,10 +18,16 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react",
-    "baseUrl": ".",
+    "baseUrl": "server",
     "paths": {
-      "@server/app.config": [
-        "server/app.config"
+      "@:system": [
+        "system"
+      ],
+      "@:app.config": [
+        "app.config"
+      ],
+      "@:app.routes/*": [
+        "routes/*"
       ]
     }
   },
