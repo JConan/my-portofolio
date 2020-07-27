@@ -11,7 +11,9 @@ const { combine, timestamp, label, printf, prettyPrint } = format;
 const loggerLevel = process.env.LOGGER_LEVEL || "debug";
 const isProd = process.env.NODE_ENV === "production";
 const useNodeCluster = (process.env.USE_NODE_CLUSTER && true) || false;
-const numberOfCpu = os.cpus().length;
+const numberOfThread = Number.parseInt(
+  process.env.NUMBER_OF_THREAD || "" + os.cpus().length
+);
 
 /**
  * Logger
@@ -44,7 +46,7 @@ const fork = (nIntance: number) => {
     logger.info(`Node cluster worker ${process.pid} is running`);
   }
 };
-useNodeCluster && fork(numberOfCpu);
+useNodeCluster && fork(numberOfThread);
 
 const isWorker = !(useNodeCluster && cluster.isMaster);
 
@@ -52,6 +54,6 @@ export default {
   loggerLevel,
   isProd,
   useNodeCluster,
-  numberOfCpu,
+  numberOfThread,
   isWorker,
 };

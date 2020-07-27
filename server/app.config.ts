@@ -1,6 +1,4 @@
 import { Express, Router } from "express";
-import { logger } from "./system";
-import { createProxyMiddleware } from "http-proxy-middleware";
 import { Hello } from "@:app.routes/hello";
 
 /**
@@ -19,17 +17,6 @@ const createRoute = (config: routeConfig) => {
 };
 
 export const apply = (app: Express) => {
-  // proxy
-  app.use(
-    "/api/todos",
-    createProxyMiddleware({
-      pathRewrite: (p: string) => p.replace(/^\/api\/todos\/(.*)/, "/todos/$1"),
-      target: "https://jsonplaceholder.typicode.com",
-      changeOrigin: true,
-      logProvider: () => logger,
-    })
-  );
-
   // list
   const routeConfigs: { [path: string]: Array<routeConfig> } = {
     "/v1": [Hello],
