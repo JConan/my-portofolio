@@ -10,18 +10,21 @@ export const staticDirectories = {
 };
 
 export type routeConfig = (router: Router) => void;
-const createRoute = (config: routeConfig) => {
+
+// Helpers to create route and config
+export const createRoute = (config: routeConfig) => {
   const router = Router();
   config(router);
   return router;
 };
 
 export const apply = (app: Express) => {
-  // list
+  // list of route components
   const routeConfigs: { [path: string]: Array<routeConfig> } = {
     "/v1": [Hello],
   };
 
+  // load routes
   Object.entries(routeConfigs).forEach(([path, configs]) => {
     configs.forEach((routeConfig) => app.use(path, createRoute(routeConfig)));
   });
