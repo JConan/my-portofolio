@@ -9,13 +9,13 @@
     "yarn": "1.22.x"
   },
   "scripts": {
-    "start": "yarn run ts-node -r tsconfig-paths/register server",
+    "start": "yarn run ts-node -r dotenv/config -r tsconfig-paths/register server",
     "build": "cd react-ui/ && yarn install && yarn build",
-    "start:ui": "cd react-ui/ && yarn start",
-    "start:server": "nodemon",
-    "dev": "concurrently \"yarn start:server\" \"yarn start:ui\"",
     "install": "cd react-ui && yarn install",
     "install:check": "yarn install --ignore-platform --check-files && cd react-ui && yarn install --ignore-platform --check-files",
+    "start:ui": "cd react-ui/ && yarn start",
+    "start:server": "nodemon",
+    "start:dev": "concurrently \"yarn start:server\" \"yarn start:ui\"",
     "test:ui": "cd react-ui/ && yarn test",
     "test:server": "jest --watch"
   },
@@ -24,18 +24,20 @@
     "react-ui/node_modules"
   ],
   "dependencies": {
-    "ts-node": "^8.10.2",
-    "tsconfig-paths": "^3.9.0",
     "@types/express": "^4.17.7",
     "@types/helmet": "^0.0.47",
     "@types/http-proxy-middleware": "^0.19.3",
     "@types/lodash": "^4.14.158",
     "@types/morgan": "^1.9.1",
+    "axios": "^0.19.2",
+    "dotenv": "^8.2.0",
     "express": "^4.16.4",
     "helmet": "^3.23.3",
     "http-proxy-middleware": "^1.0.5",
     "lodash": "^4.17.19",
     "morgan": "^1.10.0",
+    "ts-node": "^8.10.2",
+    "tsconfig-paths": "^3.9.0",
     "winston": "^3.3.3"
   },
   "license": "MIT",
