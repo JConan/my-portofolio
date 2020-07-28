@@ -23,7 +23,10 @@ appConfig.apply(app);
  * serve static folders
  */
 Object.entries(appConfig.staticDirectories).forEach(([path, folder]) => {
-  app.use(path, express.static(sysPath.join(__dirname, folder)));
+  app.use("/", express.static(sysPath.join(__dirname, folder)));
+  app.get("/*", function (req, res) {
+    res.sendFile(sysPath.join(__dirname, folder, "index.html"));
+  });
   logger.info(`serve-static: ${path} -> ${folder}`);
 });
 

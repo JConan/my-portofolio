@@ -2,7 +2,7 @@ import * as React from "react";
 import { getMovies } from "./services/fakeMovieService";
 import MovieTable, { Movie } from "./components/MovieTable";
 import { Switch, Route } from "react-router-dom";
-import axios from "axios";
+import Axios from "axios";
 import "./Vidly.sass";
 
 export interface VidlyProps {}
@@ -10,10 +10,9 @@ export interface VidlyProps {}
 const Vidly: React.SFC<VidlyProps> = () => {
   let [movies, setMovies] = React.useState<Array<Movie>>([]);
   React.useEffect(() => {
-    interface Todo {
-      title: string;
-      completed: boolean;
-    }
+    (async () => {
+      await (await Axios.get("/v1/hello")).data;
+    })();
 
     setMovies(
       getMovies().map((movie) => ({
