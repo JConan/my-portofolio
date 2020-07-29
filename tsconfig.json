@@ -28,6 +28,9 @@
       ],
       "@:app.routes/*": [
         "routes/*"
+      ],
+      "@:app.tools": [
+        "app.tools"
       ]
     }
   },

@@ -8,7 +8,10 @@ const { combine, timestamp, label, printf, prettyPrint } = format;
 /**
  * Configuration
  */
-const loggerLevel = process.env.LOGGER_LEVEL || "debug";
+const loggerLevel =
+  process.env.LOGGER_LEVEL || String(process.env.NODE_ENV) === "jest"
+    ? "error"
+    : "debug";
 const isProd = process.env.NODE_ENV === "production";
 const useNodeCluster = (process.env.USE_NODE_CLUSTER && true) || false;
 const numberOfThread = Number.parseInt(
