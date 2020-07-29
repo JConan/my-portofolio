@@ -17,7 +17,7 @@ export interface StaticFolderProps {
   defaultPage?: string;
 }
 
-const setRouterBasePath = (basePath: string, router: Router) => {
+const setRouterBasePath = (basePath: string, router: Router): Router => {
   if (!basePath.startsWith("/"))
     throw `AppTools: basePath must start with '/' but received ${basePath}`;
   const basePathRouter = Router();
@@ -32,7 +32,7 @@ class AppConfigBuilder {
   addRouterSetting = (
     applyRouterSetting: applyRouterSetting,
     basePath?: string
-  ) => {
+  ): AppConfigBuilder => {
     const router = Router();
     applyRouterSetting(router);
 
@@ -44,7 +44,7 @@ class AppConfigBuilder {
     return this;
   };
 
-  addStaticFolder = (props: StaticFolderProps) => {
+  addStaticFolder = (props: StaticFolderProps): AppConfigBuilder => {
     const router = Router();
     const folderFullPath = sysPath.join(__dirname, props.folderPath);
     router.use("/", express.static(folderFullPath));
@@ -61,7 +61,7 @@ class AppConfigBuilder {
     return this;
   };
 
-  apply = (app: Express) => {
+  apply = (app: Express): void => {
     const allRouters = [...this._routers, ...this._staticFolders];
     allRouters.forEach((router) => app.use(router));
   };

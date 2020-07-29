@@ -1,6 +1,6 @@
-import { routerConfig } from "express.helpers";
+import { applyRouterSetting } from "@:app.tools";
 
-export const Movies: routerConfig = (route) => {
+export const Movies: applyRouterSetting = (route) => {
   route.get("/movies", (req, res) => {
     res.send([]);
   });

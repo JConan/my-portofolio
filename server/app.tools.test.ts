@@ -122,4 +122,18 @@ describe("app basic setup test", () => {
     const response = await request(app).get("/v1/package.json");
     expect(response.status).toBe(200);
   });
+
+  it("should throw error if basepath do not start with '/'", async () => {
+    const app = express();
+
+    expect(() => {
+      AppTools.configure(app, {
+        v1: {
+          routerSettings: [
+            (router) => router.get("/hello", (req, res) => res.send("Hello")),
+          ],
+        },
+      });
+    }).toThrow();
+  });
 });
