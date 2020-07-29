@@ -17,7 +17,8 @@
     "start:server": "nodemon",
     "start:dev": "concurrently \"yarn start:server\" \"yarn start:ui\"",
     "test:ui": "cd react-ui/ && yarn test",
-    "test:server": "NODE_ENV=jest jest --watch"
+    "test:server": "NODE_ENV=jest jest --watch",
+    "lint": "eslint -c .eslintrc.js --ext .ts <mySrcFolder>"
   },
   "cacheDirectories": [
     "node_modules",
@@ -47,15 +48,17 @@
     "@babel/core": "^7.0.0",
     "@types/jest": "24.9.0",
     "@types/supertest": "^2.0.10",
+    "@typescript-eslint/eslint-plugin": "^2.10.0",
+    "@typescript-eslint/parser": "^2.10.0",
     "babel-jest": "24.9.0",
     "concurrently": "^5.2.0",
+    "eslint": "^6.6.0",
     "jest": "24.9.0",
     "mongodb-memory-server": "^6.6.3",
     "nodemon": "^2.0.4",
     "supertest": "^4.0.2",
     "ts-jest": "^24.3.0",
     "tsconfig-paths-jest": "^0.0.1",
-    "tslint": "^6.1.2",
     "typescript": "^3.9.7"
   }
 }

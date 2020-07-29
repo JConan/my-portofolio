@@ -1,6 +1,5 @@
 import express, { Express, Router } from "express";
 import sysPath from "path";
-import { logger as log } from "@:system";
 
 export type applyRouterSetting = (router: Router) => void;
 
@@ -68,8 +67,8 @@ class AppConfigBuilder {
   };
 }
 
-export const createConfig = () => new AppConfigBuilder();
-export const configure = (app: Express, appConfig: AppConfig) => {
+export const createConfig = (): AppConfigBuilder => new AppConfigBuilder();
+export const configure = (app: Express, appConfig: AppConfig): void => {
   const builder = createConfig();
 
   Object.entries(appConfig).forEach(([basePath, config]) => {
