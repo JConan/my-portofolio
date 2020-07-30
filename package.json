@@ -61,5 +61,10 @@
     "ts-jest": "^24.3.0",
     "tsconfig-paths-jest": "^0.0.1",
     "typescript": "^3.9.7"
+  },
+  "config": {
+    "mongodbMemoryServer": {
+      "debug": "0"
+    }
   }
 }
