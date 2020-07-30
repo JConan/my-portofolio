@@ -9,7 +9,7 @@
     "yarn": "1.22.x"
   },
   "scripts": {
-    "start": "yarn run ts-node -r dotenv/config -r tsconfig-paths/register server",
+    "start": "ts-node -r dotenv/config -r tsconfig-paths/register server dotenv_config_path=server/.env",
     "build": "cd react-ui/ && yarn install && yarn build",
     "install": "cd react-ui && yarn install",
     "install:check": "yarn install --ignore-platform --check-files && cd react-ui && yarn install --ignore-platform --check-files",
@@ -17,7 +17,7 @@
     "start:server": "nodemon",
     "start:dev": "concurrently \"yarn start:server\" \"yarn start:ui\"",
     "test:ui": "cd react-ui/ && yarn test",
-    "test:server": "NODE_ENV=jest jest --watch",
+    "test:server": "DOTENV_CONFIG_PATH=server/.env jest --watch",
     "lint": "eslint -c .eslintrc.js --ext .ts <mySrcFolder>"
   },
   "cacheDirectories": [
