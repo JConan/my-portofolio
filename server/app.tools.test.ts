@@ -42,6 +42,18 @@ describe("app basic setup test", () => {
     expect(response.text).toContain('"name": "my-portofolio-server"');
   });
 
+  it("should be able to add static folder routing with client routing", async () => {
+    const app = express();
+    AppTools.createConfig()
+      .addStaticFolder({
+        folderPath: "../react-ui/build/",
+        useClientSideRouting: true,
+      })
+      .apply(app);
+    const response = await request(app).get("/unknow/path");
+    expect(response.status).toBe(200);
+  });
+
   it("should be able to add static folder routing with basePath", async () => {
     const app = express();
     AppTools.createConfig()
