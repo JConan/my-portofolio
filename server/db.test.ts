@@ -1,4 +1,5 @@
 import db from "./db";
+import dbInMemory from "./db.inMemory";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
 
@@ -53,7 +54,7 @@ describe("db connection - basic connection test", () => {
 
   it("should be able to create an InMemoryServer", async () => {
     expect.assertions(3);
-    const server = await db.createInMemoryServerConnection();
+    const server = await dbInMemory.createServerConnection();
     expect(server.getUri()).toMatch(/^mongodb:\/\/127.0.0.1:[0-9]+.*/i);
 
     await server.connect();

@@ -1,4 +1,3 @@
-import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 
 const mongooseOptions = {
@@ -11,7 +10,7 @@ export interface IDbConnection {
   connect: () => Promise<typeof mongoose>;
 }
 
-class DbConnection implements IDbConnection {
+export class DbConnection implements IDbConnection {
   private _uri: string;
 
   constructor(uri: string) {
@@ -29,20 +28,6 @@ class DbConnection implements IDbConnection {
   }
 }
 
-class InMemoryServerDbConnection extends DbConnection {
-  private _mongod: MongoMemoryServer;
-
-  constructor(mongod: MongoMemoryServer, uri: string) {
-    super(uri);
-    this._mongod = mongod;
-  }
-
-  close() {
-    this._mongod.stop();
-    return super.close();
-  }
-}
-
 export default {
   createServerConnection: (uri?: string) => {
     const _uri = uri || process.env.MONGODB_URI;
@@ -51,10 +36,5 @@ export default {
     } else {
       throw "createServer could not resolve URI.";
     }
-  },
-  createInMemoryServerConnection: async () => {
-    const mongod = await MongoMemoryServer.create();
-    const dbUri = await mongod.getUri();
-    return new InMemoryServerDbConnection(mongod, dbUri);
   },
 };
