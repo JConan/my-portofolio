@@ -1,11 +1,11 @@
 import express, { Express, Router } from "express";
 import sysPath from "path";
 
-export type applyRouterSetting = (router: Router) => void;
+export type configRouter = (router: Router) => void;
 
 export interface AppConfig {
   [basePath: string]: {
-    routerSettings?: Array<applyRouterSetting>;
+    routerSettings?: Array<configRouter>;
     staticFolders?: Array<StaticFolderProps>;
   };
 }
@@ -17,30 +17,15 @@ export interface StaticFolderProps {
   defaultPage?: string;
 }
 
-const setRouterBasePath = (basePath: string, router: Router): Router => {
-  if (!basePath.startsWith("/"))
-    throw `AppTools: basePath must start with '/' but received ${basePath}`;
-  const basePathRouter = Router();
-  basePathRouter.use(basePath, router);
-  return basePathRouter;
-};
-
 class AppConfigBuilder {
   private _routers: Array<Router> = [];
   private _staticFolders: Array<Router> = [];
 
   addRouterSetting = (
-    applyRouterSetting: applyRouterSetting,
+    config: configRouter,
     basePath?: string
   ): AppConfigBuilder => {
-    const router = Router();
-    applyRouterSetting(router);
-
-    if (basePath) {
-      this._routers.push(setRouterBasePath(basePath, router));
-    } else {
-      this._routers.push(router);
-    }
+    this._routers.push(createRouter(config, basePath));
     return this;
   };
 
@@ -68,7 +53,7 @@ class AppConfigBuilder {
 }
 
 export const createConfig = (): AppConfigBuilder => new AppConfigBuilder();
-export const configure = (app: Express, appConfig: AppConfig): void => {
+export const configure = (app: Express, appConfig: AppConfig): Express => {
   const builder = createConfig();
 
   Object.entries(appConfig).forEach(([basePath, config]) => {
@@ -87,5 +72,22 @@ export const configure = (app: Express, appConfig: AppConfig): void => {
   });
 
   builder.apply(app);
+  return app;
 };
-export {};
+export const createRouter = (config: configRouter, basePath?: string) => {
+  const router = Router();
+  config(router);
+  if (basePath) {
+    return setRouterBasePath(basePath, router)
+  } else {
+    return router;
+  }
+};
+
+const setRouterBasePath = (basePath: string, router: Router): Router => {
+  if (!basePath.startsWith("/"))
+    throw `AppTools: basePath must start with '/' but received ${basePath}`;
+  const basePathRouter = Router();
+  basePathRouter.use(basePath, router);
+  return basePathRouter;
+};

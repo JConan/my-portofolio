@@ -1,6 +1,6 @@
-import { AppConfig, applyRouterSetting } from "@:app.tools";
+import { AppConfig, configRouter } from "@:app.tools";
 
-const Hello: applyRouterSetting = (router) => {
+const Hello: configRouter = (router) => {
   router.get("/hello", (req, res) => res.send("hello"));
 };
 
