@@ -17,7 +17,7 @@
     "start:server": "nodemon",
     "start:dev": "concurrently \"yarn start:server\" \"yarn start:ui\"",
     "test:ui": "cd react-ui/ && yarn test",
-    "test:server": "DOTENV_CONFIG_PATH=server/.env jest --watchAll --coverage",
+    "test:server": "DOTENV_CONFIG_PATH=server/.env jest --watchAll --coverage --runInBand",
     "lint": "eslint -c .eslintrc.js --ext .ts <mySrcFolder>"
   },
   "cacheDirectories": [

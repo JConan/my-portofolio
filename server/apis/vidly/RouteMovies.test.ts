@@ -5,10 +5,6 @@ import { RouteMovies } from "./RouteMovies";
 import dbInMemory from "../../db.inMemory";
 import ModelMovies, { IMovie } from "./ModelMovies";
 
-// start database
-const dbServer = dbInMemory.createServerConnection();
-(async () => (await dbServer).connect())();
-
 // insert data
 [
   {
@@ -28,7 +24,9 @@ const app = configure(express(), {
 });
 
 describe("Vidly Movie APIs", () => {
-  afterAll(async () => (await dbServer).close());
+  const dbServer = dbInMemory.createServerConnection();
+  beforeAll(async () => await dbServer.connect())
+  afterAll(async () => await dbServer.disconnect());
 
   it("should be able access to get /movies", async () => {
     const response = await request(app).get("/movies");
