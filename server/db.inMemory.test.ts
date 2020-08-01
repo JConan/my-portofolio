@@ -1,5 +1,6 @@
 import dbInMemory from "./db.inMemory";
-import mongoose, { Schema } from "mongoose"
+import mongoose from "mongoose"
+const { connection, STATES, Schema, Types: { ObjectId } } = mongoose
 
 
 describe('in mememory db - for unit testing purpose', () => {
@@ -19,12 +20,12 @@ describe('in mememory db - for unit testing purpose', () => {
 
         afterEach(async () => {
             await dbServer.disconnect();
-            expect(mongoose.connection.readyState).not.toBe(mongoose.STATES.connected);
+            expect(connection.readyState).not.toBe(STATES.connected);
         })
 
         it.each([1, 2, 3])('should able to check connection state', () => {
             expect(dbServer.getUri()).toMatch(/^mongodb:\/\/127.0.0.1:[0-9]+.*/i);
-            expect(mongoose.connection.readyState).toBe(mongoose.STATES.connected);
+            expect(connection.readyState).toBe(STATES.connected);
         })
     })
 
@@ -36,7 +37,7 @@ describe('in mememory db - for unit testing purpose', () => {
         beforeEach(async () => {
             expect.assertions(3)
             const result = await model.collection.insertMany([
-                { _id: mongoose.Types.ObjectId("5f258b1eb04cac066446b960"), test: "inMemory" },
+                { _id: ObjectId("5f258b1eb04cac066446b960"), test: "inMemory" },
                 {},
                 {}])
             expect(result.insertedCount).toBe(3)
