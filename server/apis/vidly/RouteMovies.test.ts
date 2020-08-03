@@ -2,7 +2,7 @@ import express from "express";
 import request from "supertest";
 import { configure } from "@:app.tools";
 import { RouteMovies } from "./RouteMovies";
-import dbInMemory from "../../db.inMemory";
+import dbInMemory from "@:lib/db.inMemory";
 import ModelMovies, { IMovie } from "./ModelMovies";
 
 // insert data
@@ -25,7 +25,7 @@ const app = configure(express(), {
 
 describe("Vidly Movie APIs", () => {
   const dbServer = dbInMemory.createServerConnection();
-  beforeAll(async () => await dbServer.connect())
+  beforeAll(async () => await dbServer.connect());
   afterAll(async () => await dbServer.disconnect());
 
   it("should be able access to get /movies", async () => {
