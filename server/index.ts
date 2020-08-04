@@ -1,3 +1,4 @@
+import util from "util";
 import db from "@:lib/db.connection";
 import dbConfig from "./db.conf";
 
@@ -11,20 +12,17 @@ if (system.isWorker) {
   const cleanUpTask: { (): void }[] = [];
 
   db.load(dbConfig)
-    .getConnections()
     .then((connections) => {
-      Object.entries(connections).forEach(([name, app]) => {
-        if (app.connection !== undefined) {
-          const { host, port, db: _db } = app.connection;
-          logger.info(
-            `db connected for application [${name}] to uri [mongodb://${host}:${port}/${_db.databaseName}]`
-          );
-        }
+      Object.entries(connections).forEach(([name, connection]) => {
+        const { host, port, db: _db } = connection;
+        logger.info(
+          `db connected for application [${name}] to uri [mongodb://${host}:${port}/${_db.databaseName}]`
+        );
 
         const disconnectionTask = async () => {
           logger.info(`[${name}] database connection closing ...`);
-          await app.connection
-            ?.close()
+          await connection
+            .close()
             .then(() => logger.info(`[${name}] database connection closed`))
             .catch((ex) => logger.error(`[${name}] database error : ${ex}`));
         };
@@ -33,7 +31,7 @@ if (system.isWorker) {
 
       AppBuilder().apply(config).listen();
     })
-    .catch((ex) => logger.error(ex.error));
+    .catch((ex) => logger.error(util.inspect(ex)));
 
   ["SIGINT", "SIGTERM"].forEach((signal) =>
     process.on(signal, async () => {
