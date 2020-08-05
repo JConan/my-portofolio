@@ -5,25 +5,7 @@ export interface DbConnection {
   [name: string]: mongoose.Connection;
 }
 
-export const mongooseConnections: DbConnection = {};
-
-export const createConnection = (
-  name: string,
-  uri: string,
-  options: mongoose.ConnectionOptions
-): Promise<mongoose.Connection> => {
-  const _connection = mongoose.createConnection(uri, options);
-  mongooseConnections[name] = _connection;
-  return new Promise<mongoose.Connection>(async (resolve, reject) =>
-    _connection.then(resolve).catch(reject)
-  );
-};
-
-export const closeConnection = (name: string): Promise<void> => {
-  const _connection = mongooseConnections[name];
-  delete mongooseConnections[name];
-  return _connection.close();
-};
+export const connections: DbConnection = {};
 
 export type ConnectionConfig = {
   uri: string;
@@ -42,29 +24,59 @@ export interface Config {
   };
 }
 
-export const load = (config: Config) => {
-  const connectionErrors: { [name: string]: any } = {};
-  const baseOptions = { ...defaultOption, ...config.globalOptions };
-  const appEntries = Object.entries(config.applications);
-  const promises = appEntries.map(([name, appConnection]) =>
-    createConnection(name, appConnection.uri, {
-      ...baseOptions,
-      ...appConnection.options,
-    }).catch((ex) => {
-      connectionErrors[name] = ex;
-      return ex;
-    })
-  );
+export class ConnectionBuilder {
+  private connections: DbConnection = {};
+  private config?: Config;
 
-  return new Promise<DbConnection>((resolve, reject) =>
-    Promise.allSettled(promises).then((results) => {
-      _.isEmpty(connectionErrors)
-        ? resolve(mongooseConnections)
-        : reject(connectionErrors);
-    })
-  );
-};
+  getConnections = () => {
+    return { ...this.connections };
+  };
+  createConnection = (
+    name: string,
+    uri: string,
+    options: mongoose.ConnectionOptions
+  ): Promise<mongoose.Connection> => {
+    const _connection = mongoose.createConnection(uri, options);
+    this.connections[name] = _connection;
+    return new Promise<mongoose.Connection>(async (resolve, reject) =>
+      _connection.then(resolve).catch(reject)
+    );
+  };
+  closeConnection = (name: string): Promise<void> => {
+    const _connection = this.connections[name];
+    delete this.connections[name];
+    return _connection.close();
+  };
+  load = (config: Config) => {
+    this.config = config;
+    const connectionErrors: { [name: string]: any } = {};
+    const baseOptions = { ...defaultOption, ...config.globalOptions };
+    const appEntries = Object.entries(config.applications);
+    const promises = appEntries.map(([name, appConnection]) =>
+      this.createConnection(name, appConnection.uri, {
+        ...baseOptions,
+        ...appConnection.options,
+      }).catch((ex) => {
+        connectionErrors[name] = ex;
+        return ex;
+      })
+    );
+
+    return new Promise<DbConnection>((resolve, reject) =>
+      Promise.allSettled(promises).then((results) => {
+        if (_.isEmpty(connectionErrors)) {
+          resolve(this.connections);
+        } else {
+          reject(connectionErrors);
+        }
+      })
+    );
+  };
+}
+
+const globalBuild = new ConnectionBuilder();
 
 export default {
-  load,
+  getConnections: globalBuild.getConnections,
+  load: globalBuild.load,
 };

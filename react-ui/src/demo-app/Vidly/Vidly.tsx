@@ -1,5 +1,4 @@
 import * as React from "react";
-import { getMovies } from "./services/fakeMovieService";
 import MovieTable, { Movie } from "./components/MovieTable";
 import { Switch, Route } from "react-router-dom";
 import Axios from "axios";
@@ -11,18 +10,9 @@ const Vidly: React.SFC<VidlyProps> = () => {
   let [movies, setMovies] = React.useState<Array<Movie>>([]);
   React.useEffect(() => {
     (async () => {
-      await (await Axios.get("/v1/hello")).data;
+      const _movies = (await Axios.get<Array<Movie>>("/api/vidly/movies")).data;
+      setMovies(_movies);
     })();
-
-    setMovies(
-      getMovies().map((movie) => ({
-        id: movie._id,
-        title: movie.title,
-        genre: movie.genre.name,
-        stock: movie.numberInStock,
-        rate: movie.dailyRentalRate,
-      }))
-    );
   }, []);
 
   let likeButtonToggler = (toggleMovie: Movie) => {

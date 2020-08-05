@@ -1,4 +1,7 @@
-import mongoose, { Schema, Document } from "mongoose";
+import db from "@:lib/db.connection";
+import { Schema, Document, Model } from "mongoose";
+
+const { vidly } = db.getConnections();
 
 export interface IMovie extends Document {
   title: string;
@@ -14,4 +17,11 @@ const MovieSchema: Schema = new Schema({
   rate: { type: Number, required: true },
 });
 
-export default mongoose.model<IMovie>("Movies", MovieSchema);
+export interface VidlyModels {
+  movie: Model<IMovie, {}>;
+}
+
+const models = {
+  movie: vidly.model<IMovie>("Movies", MovieSchema),
+};
+export default models;

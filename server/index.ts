@@ -4,15 +4,14 @@ import dbConfig from "./db.conf";
 
 import system, { logger } from "./system";
 import AppBuilder from "./app";
-import config from "@:app.config";
 
 // Run application only in Worker Thread
-logger.info(`sys started with PID=${process.pid}`);
+logger.info(`system started with PID=${process.pid}`);
 if (system.isWorker) {
   const cleanUpTask: { (): void }[] = [];
 
   db.load(dbConfig)
-    .then((connections) => {
+    .then(async (connections) => {
       Object.entries(connections).forEach(([name, connection]) => {
         const { host, port, db: _db } = connection;
         logger.info(
@@ -29,6 +28,7 @@ if (system.isWorker) {
         cleanUpTask.push(disconnectionTask);
       });
 
+      const config = (await import("@:app.config")).default;
       AppBuilder().apply(config).listen();
     })
     .catch((ex) => logger.error(util.inspect(ex)));

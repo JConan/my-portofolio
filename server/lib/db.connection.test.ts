@@ -1,4 +1,4 @@
-import { mongooseConnections, defaultOption } from "./db.connection";
+import { connections, defaultOption } from "./db.connection";
 import * as db from "./db.connection";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
@@ -14,24 +14,26 @@ describe("database connection", () => {
   });
   afterAll(async () => await dbServer.stop());
 
-  describe("create named connection", () => {
+  describe("create connection", () => {
     it("should be able open/close named connection", async () => {
+      const builder = new db.ConnectionBuilder();
       expect.assertions(5);
-      await db.createConnection("test", dbUri, defaultOption);
-      const { test, toto } = mongooseConnections;
+      await builder.createConnection("test", dbUri, defaultOption);
+      const { test, toto } = builder.getConnections();
       expect(test).toBeDefined();
       expect(toto).toBeUndefined();
       expect(test.readyState).toBe(mongoose.STATES.connected);
 
-      await db.closeConnection("test");
+      await builder.closeConnection("test");
       expect(test.readyState).toBe(mongoose.STATES.disconnected);
-      expect(mongooseConnections.test).toBeUndefined();
+      expect(connections.test).toBeUndefined();
     });
 
     it("should be able to failed properly", async () => {
+      const builder = new db.ConnectionBuilder();
       expect.assertions(1);
       try {
-        await db.createConnection("test", dbUnreachable, defaultOption);
+        await builder.createConnection("test", dbUnreachable, defaultOption);
       } catch (ex) {
         expect(String(ex)).toContain("MongooseServerSelectionError");
       }
@@ -39,17 +41,50 @@ describe("database connection", () => {
   });
 
   describe("create with config", () => {
-    it("should be able to create connection with config", async () => {
+    it("should be able to create one connectiong", async () => {
+      const builder = new db.ConnectionBuilder();
       expect.assertions(1);
-      await db.load({ applications: { fooApp: { uri: dbUri } } });
-      expect(mongooseConnections.fooApp).toBeDefined();
+      await builder.load({ applications: { fooApp: { uri: dbUri } } });
+      expect(builder.getConnections().fooApp).toBeDefined();
+    });
+
+    it("should be able to create multiple connection", async () => {
+      const builder = new db.ConnectionBuilder();
+      expect.assertions(3);
+      await builder.load({
+        applications: {
+          fooApp: { uri: dbUri },
+          barApp: { uri: dbUri },
+          testApp: { uri: dbUri },
+        },
+      });
+      expect(builder.getConnections().fooApp).toBeDefined();
+      expect(builder.getConnections().barApp).toBeDefined();
+      expect(builder.getConnections().testApp).toBeDefined();
     });
 
     it("should be able to failed properly with config", async () => {
+      const builder = new db.ConnectionBuilder();
       expect.assertions(1);
       try {
-        await db.load({
+        await builder.load({
           applications: { fooApp: { uri: dbUnreachable } },
+        });
+      } catch (ex) {
+        expect(JSON.stringify(ex)).toMatch(/ECONNREFUSED|connection timed out/);
+      }
+    });
+
+    it("should be able to failed properly with multiple connection", async () => {
+      const builder = new db.ConnectionBuilder();
+      expect.assertions(1);
+      try {
+        await builder.load({
+          applications: {
+            fooApp: { uri: dbUri },
+            barApp: { uri: dbUri },
+            failedApp: { uri: dbUnreachable },
+          },
         });
       } catch (ex) {
         expect(JSON.stringify(ex)).toMatch(/ECONNREFUSED|connection timed out/);

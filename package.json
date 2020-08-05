@@ -18,7 +18,8 @@
     "start:dev": "concurrently \"yarn start:server\" \"yarn start:ui\"",
     "test:ui": "cd react-ui/ && yarn test",
     "test:server": "DOTENV_CONFIG_PATH=server/.env jest --watchAll --coverage --runInBand",
-    "lint": "eslint -c .eslintrc.js --ext .ts <mySrcFolder>"
+    "lint": "eslint -c .eslintrc.js --ext .ts <mySrcFolder>",
+    "sandbox": "nodemon --watch server/sandbox.ts --exec ts-node -r dotenv/config -r tsconfig-paths/register server/sandbox.ts dotenv_config_path=server/.env"
   },
   "cacheDirectories": [
     "node_modules",
