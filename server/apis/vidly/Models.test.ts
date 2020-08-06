@@ -1,22 +1,23 @@
-import dbConnection from "@:lib/db.connection";
+import db from "@:lib/db.connection";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { VidlyModels } from "./Models";
 import { isValidObjectId } from "mongoose";
+import { logger } from "../../system";
+logger.transports[0].silent = true;
+//import Models from "./Models";
 
 describe("Vidly models", () => {
   const server = MongoMemoryServer.create();
-  var models: VidlyModels;
 
   beforeAll(async () => {
-    await dbConnection.load({
+    db.load({
       applications: { vidly: { uri: await (await server).getUri() } },
     });
-    models = (await import("./Models")).default;
   });
 
   it("should be create data", async () => {
-    expect(models.movie).toBeDefined();
-    const result = await models.movie.create({
+    const Models = require("./Models").default.movie;
+    expect(Models).toBeDefined();
+    const result = await Models.create({
       title: "Test Driven Design",
       genre: "documentary",
       rate: 5,

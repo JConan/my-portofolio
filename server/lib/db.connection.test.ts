@@ -1,7 +1,7 @@
-import { connections, defaultOption } from "./db.connection";
 import * as db from "./db.connection";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import mongoose from "mongoose";
+import { logger } from "../system";
+logger.transports[0].silent = true;
 
 describe("database connection", () => {
   const dbUnreachable =
@@ -14,81 +14,34 @@ describe("database connection", () => {
   });
   afterAll(async () => await dbServer.stop());
 
-  describe("create connection", () => {
-    it("should be able open/close named connection", async () => {
-      const builder = new db.ConnectionBuilder();
-      expect.assertions(5);
-      await builder.createConnection("test", dbUri, defaultOption);
-      const { test, toto } = builder.getConnections();
-      expect(test).toBeDefined();
-      expect(toto).toBeUndefined();
-      expect(test.readyState).toBe(mongoose.STATES.connected);
-
-      await builder.closeConnection("test");
-      expect(test.readyState).toBe(mongoose.STATES.disconnected);
-      expect(connections.test).toBeUndefined();
-    });
-
-    it("should be able to failed properly", async () => {
-      const builder = new db.ConnectionBuilder();
+  describe("create connection with config", () => {
+    it("should failed when no config is found", () => {
       expect.assertions(1);
       try {
-        await builder.createConnection("test", dbUnreachable, defaultOption);
+        db.getConnection("failedApp");
       } catch (ex) {
-        expect(String(ex)).toContain("MongooseServerSelectionError");
+        expect(ex.message).toBe(
+          "no configuration found for application [failedApp]"
+        );
       }
     });
-  });
 
-  describe("create with config", () => {
-    it("should be able to create one connectiong", async () => {
-      const builder = new db.ConnectionBuilder();
+    it("should be able to create connection from config", async () => {
       expect.assertions(1);
-      await builder.load({ applications: { fooApp: { uri: dbUri } } });
-      expect(builder.getConnections().fooApp).toBeDefined();
+      db.load({ applications: { test: { uri: dbUri } } });
+      const connection = db.getConnection("test");
+      const { host, port } = connection;
+      expect(dbUri).toMatch(new RegExp(`^mongodb://${host}:${port}/.*`));
+      await connection.close();
     });
 
-    it("should be able to create multiple connection", async () => {
-      const builder = new db.ConnectionBuilder();
-      expect.assertions(3);
-      await builder.load({
-        applications: {
-          fooApp: { uri: dbUri },
-          barApp: { uri: dbUri },
-          testApp: { uri: dbUri },
-        },
+    it("should failed properly with invalid connection", async () => {
+      db.load({ applications: { test: { uri: dbUnreachable } } });
+      await db.getConnection("test").catch((ex) => {
+        expect(ex.message).toMatch(
+          /connection timed out|connect ECONNREFUSED/i
+        );
       });
-      expect(builder.getConnections().fooApp).toBeDefined();
-      expect(builder.getConnections().barApp).toBeDefined();
-      expect(builder.getConnections().testApp).toBeDefined();
-    });
-
-    it("should be able to failed properly with config", async () => {
-      const builder = new db.ConnectionBuilder();
-      expect.assertions(1);
-      try {
-        await builder.load({
-          applications: { fooApp: { uri: dbUnreachable } },
-        });
-      } catch (ex) {
-        expect(JSON.stringify(ex)).toMatch(/ECONNREFUSED|connection timed out/);
-      }
-    });
-
-    it("should be able to failed properly with multiple connection", async () => {
-      const builder = new db.ConnectionBuilder();
-      expect.assertions(1);
-      try {
-        await builder.load({
-          applications: {
-            fooApp: { uri: dbUri },
-            barApp: { uri: dbUri },
-            failedApp: { uri: dbUnreachable },
-          },
-        });
-      } catch (ex) {
-        expect(JSON.stringify(ex)).toMatch(/ECONNREFUSED|connection timed out/);
-      }
     });
   });
 });

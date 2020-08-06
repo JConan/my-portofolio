@@ -1,82 +1,59 @@
-import mongoose from "mongoose";
+import mongoose, { Connection, ConnectionOptions } from "mongoose";
 import _ from "lodash";
-
-export interface DbConnection {
-  [name: string]: mongoose.Connection;
-}
-
-export const connections: DbConnection = {};
-
-export type ConnectionConfig = {
-  uri: string;
-  options?: mongoose.ConnectionOptions;
-};
-
-export const defaultOption: mongoose.ConnectionOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-};
+import { logger } from "../system";
+import util from "util";
 
 export interface Config {
   globalOptions?: mongoose.ConnectionOptions;
   applications: {
-    [name: string]: ConnectionConfig;
+    [name: string]: {
+      uri: string;
+      options?: mongoose.ConnectionOptions;
+    };
   };
 }
 
-export class ConnectionBuilder {
-  private connections: DbConnection = {};
-  private config?: Config;
+var _config: Config = { applications: {} };
 
-  getConnections = () => {
-    return { ...this.connections };
-  };
-  createConnection = (
-    name: string,
-    uri: string,
-    options: mongoose.ConnectionOptions
-  ): Promise<mongoose.Connection> => {
-    const _connection = mongoose.createConnection(uri, options);
-    this.connections[name] = _connection;
-    return new Promise<mongoose.Connection>(async (resolve, reject) =>
-      _connection.then(resolve).catch(reject)
-    );
-  };
-  closeConnection = (name: string): Promise<void> => {
-    const _connection = this.connections[name];
-    delete this.connections[name];
-    return _connection.close();
-  };
-  load = (config: Config) => {
-    this.config = config;
-    const connectionErrors: { [name: string]: any } = {};
-    const baseOptions = { ...defaultOption, ...config.globalOptions };
-    const appEntries = Object.entries(config.applications);
-    const promises = appEntries.map(([name, appConnection]) =>
-      this.createConnection(name, appConnection.uri, {
-        ...baseOptions,
-        ...appConnection.options,
-      }).catch((ex) => {
-        connectionErrors[name] = ex;
-        return ex;
-      })
-    );
+export const load = (config: Config) => {
+  _config = _.cloneDeep(config);
+};
 
-    return new Promise<DbConnection>((resolve, reject) =>
-      Promise.allSettled(promises).then((results) => {
-        if (_.isEmpty(connectionErrors)) {
-          resolve(this.connections);
-        } else {
-          reject(connectionErrors);
-        }
-      })
-    );
-  };
-}
+export const defaultOption: ConnectionOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+};
 
-const globalBuild = new ConnectionBuilder();
+type mongooseConnection = Connection & {
+  then: Promise<Connection>["then"];
+  catch: Promise<Connection>["catch"];
+};
+
+export const getConnection = (appname: string): mongooseConnection => {
+  if (_config.applications[appname] === undefined)
+    throw new Error(`no configuration found for application [${appname}]`);
+  const options = {
+    ...defaultOption,
+    ..._config.globalOptions,
+    ..._config.applications[appname].options,
+  };
+  const connection = mongoose.createConnection(
+    _config.applications[appname].uri,
+    options
+  );
+  connection
+    .then(() => {
+      const { host, port, name } = connection;
+      logger.info(`[${appname}] connected to mongod://${host}:${port}/${name}`);
+    })
+    .catch((ex) => {
+      logger.error(JSON.stringify(ex, null, 4));
+    });
+
+  return connection;
+};
 
 export default {
-  getConnections: globalBuild.getConnections,
-  load: globalBuild.load,
+  getConnection,
+  load,
 };
