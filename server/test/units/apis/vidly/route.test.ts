@@ -1,32 +1,29 @@
 import express, { Express } from "express";
 import request from "supertest";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { configure } from "@:app.tools";
-import dbConnection from "@:lib/db.connection";
-import { logger } from "../../system";
-import { Model } from "mongoose";
-import { IMovie } from "./Models";
-logger.transports[0].silent = true;
+import { Model, Connection, createConnection } from "mongoose";
+import Models, { IMovie } from "@:api.vidly/models";
+import { RouteMovies } from "@:api.vidly/route";
 
 describe("Vidly APIs", () => {
   const server = MongoMemoryServer.create();
-  var app: Express;
+  var connection: Connection;
   var Movie: Model<IMovie, {}>;
+  var app: Express;
 
   beforeAll(async () => {
-    // database
-    dbConnection.load({
-      applications: { vidly: { uri: await (await server).getUri() } },
+    const uri = await (await server).getUri();
+    connection = createConnection(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
-    Movie = (await import("./Models")).default.movie;
-    // application
-    app = configure(express(), {
-      "/": {
-        routerSettings: [(await import("./RouteMovies")).RouteMovies],
-      },
-    });
+    Movie = Models(connection).movie;
+    app = express().use(RouteMovies(connection));
   });
-  afterAll(async () => await (await server).stop());
+  afterAll(async () => {
+    await connection.close();
+    await (await server).stop();
+  });
 
   describe("API movie", () => {
     const _id = "5f2ac85849bf3c6fa2d91000";

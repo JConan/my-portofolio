@@ -1,34 +1,15 @@
 import os from "os";
 import cluster from "cluster";
 import _ from "lodash";
-import winston, { format } from "winston";
-
-const { combine, timestamp, label, printf, prettyPrint } = format;
-
+import logger from "@:lib/logger";
 /**
  * Configuration
  */
-const loggerLevel =
-  process.env.LOGGER_LEVEL || String(process.env.NODE_ENV) === "jest"
-    ? "error"
-    : "debug";
-const isProd = process.env.NODE_ENV === "production";
+const nodeEnv = String(process.env.NODE_ENV || "development");
 const useNodeCluster = (process.env.USE_NODE_CLUSTER && true) || false;
 const numberOfThread = Number.parseInt(
   process.env.NUMBER_OF_THREAD || "" + os.cpus().length
 );
-
-/**
- * Logger
- */
-export const logger = winston.createLogger({
-  format: combine(
-    format.colorize(),
-    timestamp({ format: "YYYY-MM-DD hh:mm:ss" }),
-    printf((i) => `${i.timestamp} ${i.level}: ${i.message}`)
-  ),
-  transports: [new winston.transports.Console({ level: loggerLevel })],
-});
 
 /**
  * Node Cluster forking
@@ -51,12 +32,13 @@ const fork = (nIntance: number) => {
 };
 useNodeCluster && fork(numberOfThread);
 
-const isWorker = !(useNodeCluster && cluster.isMaster);
-
-export default {
-  loggerLevel,
-  isProd,
-  useNodeCluster,
-  numberOfThread,
-  isWorker,
+export const system = {
+  isWorker: () => !(useNodeCluster && cluster.isMaster),
+  env: {
+    isProd: () => nodeEnv === "production",
+    isDev: () => nodeEnv === "development",
+    isTest: () => nodeEnv === "test",
+  },
 };
+
+export default system;

@@ -1,6 +1,7 @@
-import { configRouter } from "@:app.tools";
-import ControllerMovies from "./ControllerMovies";
-import { IMovie } from "./Models";
+import { Router } from "express";
+import { Connection } from "mongoose";
+import ControllerMovies from "@:api.vidly/controller";
+import { IMovie } from "@:api.vidly/models";
 
 interface IResourceMovie {
   id: string;
@@ -18,21 +19,24 @@ const mappingMovieResources = (m: IMovie): IResourceMovie => ({
   stock: m.stock,
 });
 
-export const RouteMovies: configRouter = (route) => {
+export const RouteMovies = (connection: Connection): Router => {
+  const route = Router();
+  const controller = ControllerMovies(connection);
   route.get("/movies", async (req, res) => {
-    const result: Array<IResourceMovie> = (
-      await ControllerMovies.getMovies()
-    ).map(mappingMovieResources);
+    const result: Array<IResourceMovie> = (await controller.getMovies()).map(
+      mappingMovieResources
+    );
     res.send(result);
   });
 
   route.get("/movies/:id", async (req, res) => {
     const id = req.params.id;
-    const data = await ControllerMovies.getMovie(id);
+    const data = await controller.getMovie(id);
     if (data !== null) {
       res.send(mappingMovieResources(data));
     } else {
       res.sendStatus(404);
     }
   });
+  return route;
 };

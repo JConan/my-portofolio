@@ -23,14 +23,8 @@
       "@:lib/*": [
         "lib/*"
       ],
-      "@:app.config": [
-        "app.config"
-      ],
-      "@:app.tools": [
-        "app.tools"
-      ],
-      "@:app.vidly/*": [
-        "apis/vidly/*"
+      "@:api.vidly/*": [
+        "api/vidly/*"
       ]
     }
   },
