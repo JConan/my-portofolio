@@ -41,6 +41,7 @@
     "lodash": "^4.17.19",
     "mongoose": "^5.9.26",
     "morgan": "^1.10.0",
+    "rxjs": "^6.6.2",
     "ts-node": "^8.10.2",
     "tsconfig-paths": "^3.9.0",
     "winston": "^3.3.3"
