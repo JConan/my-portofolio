@@ -1,10 +1,11 @@
 import { createWriteStream, mkdirSync, createReadStream } from "fs";
 import Axios from "axios";
 import { Readable } from "stream";
-import { Observable } from "rxjs";
+import { Observable, concat } from "rxjs";
 import { createInterface } from "readline";
 import { createGunzip } from "zlib";
-import { take, map, withLatestFrom, skip } from "rxjs/operators";
+import { take, map, withLatestFrom, skip, filter } from "rxjs/operators";
+import _ from "lodash";
 
 export const sources = {
   names: "https://datasets.imdbws.com/name.basics.tsv.gz",
@@ -28,7 +29,7 @@ export const downloadFile = async (url: string) => {
         getReject(new Error("Invalid Resource"));
       }
 
-      await new Promise<void>((writeResolve, writeReject) => {
+      await new Promise<void>((writeResolve) => {
         Readable.from(response.data)
           .pipe(createWriteStream(fullname))
           .on("finish", () => writeResolve());
@@ -42,16 +43,9 @@ interface ImdbDataLine {
   [name: string]: string;
 }
 
-export const streamDataFile = (path: string) => {
-  const stream$ = new Observable<string>((observer) => {
-    const lineReader = createInterface(
-      createReadStream(path).pipe(createGunzip())
-    );
-    lineReader.on("line", (line) => observer.next(line));
-    lineReader.on("close", () => observer.complete());
-    observer.add(() => lineReader.close());
-  });
-
+const pipeToStreamData = (
+  stream$: Observable<string>
+): Observable<ImdbDataLine> => {
   const streamHeader$ = stream$.pipe(
     take(1),
     map((line) => line.split("\t"))
@@ -70,5 +64,24 @@ export const streamDataFile = (path: string) => {
       return lineData;
     })
   );
+
+  return concat(
+    streamData$.pipe(filter((value) => value.tconst.length === 9)),
+    streamData$.pipe(filter((value) => value.tconst.length === 10))
+  );
+};
+
+export const streamDataFile = (path: string) => {
+  const stream$ = new Observable<string>((observer) => {
+    const lineReader = createInterface(
+      createReadStream(path).pipe(createGunzip())
+    );
+    lineReader.on("line", (line) => observer.next(line));
+    lineReader.on("close", () => observer.complete());
+    observer.add(() => lineReader.close());
+  });
+
+  const streamData$ = pipeToStreamData(stream$);
+
   return streamData$;
 };

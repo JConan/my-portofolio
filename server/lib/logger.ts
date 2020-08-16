@@ -1,5 +1,4 @@
 import winston, { format } from "winston";
-import system from "@:lib/system";
 
 const { combine, timestamp, printf } = format;
 const loggerLevel =
