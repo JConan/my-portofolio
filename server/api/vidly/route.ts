@@ -1,42 +1,40 @@
-import { Router } from "express";
-import { Connection } from "mongoose";
-import ControllerMovies from "@:api.vidly/controller";
-import { IMovie } from "@:api.vidly/models";
+import { Router } from "express"
+import { Connection } from "mongoose"
+import ControllerMovies from "@:api.vidly/controller"
+import { MovieDoc } from "@:api.vidly/models"
 
 interface IResourceMovie {
-  id: string;
-  title: string;
-  genre: string;
-  rate: number;
-  stock: number;
+  id: string
+  title: string
+  genre: string
+  rate?: number
+  stock?: number
 }
 
-const mappingMovieResources = (m: IMovie): IResourceMovie => ({
+const mappingMovieResources = (m: MovieDoc): IResourceMovie => ({
   id: String(m._id),
   title: m.title,
-  genre: m.genre,
-  rate: m.rate,
+  genre: m.genres.join(","),
+  rate: m.averageRate,
   stock: m.stock,
-});
+})
 
 export const RouteMovies = (connection: Connection): Router => {
-  const route = Router();
-  const controller = ControllerMovies(connection);
+  const route = Router()
+  const controller = ControllerMovies(connection)
   route.get("/movies", async (req, res) => {
-    const result: Array<IResourceMovie> = (await controller.getMovies()).map(
-      mappingMovieResources
-    );
-    res.send(result);
-  });
+    const result: Array<IResourceMovie> = (await controller.getMovies()).map(mappingMovieResources)
+    res.send(result)
+  })
 
   route.get("/movies/:id", async (req, res) => {
-    const id = req.params.id;
-    const data = await controller.getMovie(id);
+    const id = req.params.id
+    const data = await controller.getMovie(id)
     if (data !== null) {
-      res.send(mappingMovieResources(data));
+      res.send(mappingMovieResources(data))
     } else {
-      res.sendStatus(404);
+      res.sendStatus(404)
     }
-  });
-  return route;
-};
+  })
+  return route
+}

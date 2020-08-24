@@ -1,14 +1,14 @@
-import { Connection } from "mongoose";
-import Models from "@:api.vidly/models";
+import { Connection } from "mongoose"
+import Models from "@:api.vidly/models"
 
 export default (connection: Connection) => {
-  const { movie } = Models(connection);
+  const { Movie: movie } = Models(connection)
   return {
     async getMovies() {
-      return await movie.find().exec();
+      return await movie.find().exec()
     },
     async getMovie(id: string) {
-      return await movie.findById(id).exec();
+      return await movie.findById(id).exec()
     },
-  };
-};
+  }
+}

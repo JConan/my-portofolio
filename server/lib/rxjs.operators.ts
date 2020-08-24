@@ -31,7 +31,7 @@ export function zipSequence<T, T1, T2, T3, T4>(getId: ({ (data: T): number }), o
 export function zipSequence<T, T1, T2, T3, T4, T5>(getId: ({ (data: T): number }), o1: Observable<T1>, o2: Observable<T2>, o3: Observable<T3>, o4: Observable<T4>, o5: Observable<T5>): Observable<Sequence<[T1, T2, T3, T4, T5]>>;
 export function zipSequence(getId: ({ (data: any): number }), ...observables: Observable<any>[]): Observable<any> {
   return new Observable(observer => {
-    return zipAll<any>(interval().pipe(skip(1), take(10)), ...observables)
+    return zipAll<any>(interval().pipe(skip(1)), ...observables)
       .pipe(
         scan((state, [index, ...lines]: [number, any]) => {
           const buffer = setBuffer({ ...state.buffer }, getId, ...lines);
