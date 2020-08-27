@@ -1,6 +1,6 @@
 import { Schema, Document, Connection, Types, Model } from "mongoose"
 
-export interface MovieDoc extends Document {
+export interface Movie {
   tconst: string
   title: string
   year: number
@@ -11,18 +11,22 @@ export interface MovieDoc extends Document {
   totalVotes?: number
 }
 
-export interface GenreDoc extends Document {
+export interface Genre {
   name: string
 }
+
+export interface MovieDoc extends Movie, Document {}
+
+export interface GenreDoc extends Genre, Document {}
 
 const GenreSchema: Schema = new Schema({
   name: { type: String, required: true, unique: true },
 })
 
 const MovieSchema: Schema = new Schema({
-  tconst: { type: String, required: true, index: true, match: /tt[0-9]{7,}/i },
+  tconst: { type: String, required: true, index: true, match: /tt[0-9]{7,}/i, unique: true },
   title: { type: String, required: true },
-  year: { type: Number, required: true },
+  year: { type: Number },
   duration: { type: Number },
   genres: [{ type: Types.ObjectId, ref: GenreSchema }],
   stock: { type: Number },

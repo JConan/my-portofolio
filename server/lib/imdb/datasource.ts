@@ -1,10 +1,10 @@
 import { createWriteStream, mkdirSync, createReadStream } from "fs"
 import Axios from "axios"
 import { Readable } from "stream"
-import { Observable, concat } from "rxjs"
+import { Observable, concat, Subject, combineLatest } from "rxjs"
 import { createInterface } from "readline"
 import { createGunzip } from "zlib"
-import { take, map, withLatestFrom, skip, filter } from "rxjs/operators"
+import { take, map, withLatestFrom, skip, filter, finalize } from "rxjs/operators"
 import _ from "lodash"
 
 export const sources = {
@@ -43,15 +43,13 @@ export interface DataLine {
   [name: string]: string
 }
 
-const pipeToStreamData = (stream$: Observable<string>): Observable<DataLine> => {
-  const streamHeader$ = stream$.pipe(
-    take(1),
-    map((line) => line.split("\t"))
-  )
-  const streamData$ = stream$.pipe(
+export const createDataStream = (path: string) => {
+  const readerInput = new Subject<string>()
+  const readerInput$ = readerInput.pipe(map((line) => line.split("\t")))
+  const header$ = readerInput$.pipe(take(1))
+  const record$ = readerInput$.pipe(
     skip(1),
-    map((line) => line.split("\t")),
-    withLatestFrom(streamHeader$),
+    withLatestFrom(header$),
     map((data) => {
       const keys = data[1]
       const fields = data[0]
@@ -59,21 +57,19 @@ const pipeToStreamData = (stream$: Observable<string>): Observable<DataLine> => 
       for (var i = 0; i < keys.length; i++) {
         lineData[keys[i]] = fields[i]
       }
-      return lineData
+      return lineData as Record<string, string>
     })
   )
 
-  return streamData$
-}
+  const fileReader = createInterface(createReadStream(path).pipe(createGunzip()))
+  fileReader.on("line", (line) => readerInput.next(line))
+  fileReader.on("close", () => readerInput.complete())
 
-export const createDataStream = (path: string) => {
-  const stream$ = new Observable<string>((observer) => {
-    const lineReader = createInterface(createReadStream(path).pipe(createGunzip()))
-    lineReader.on("line", (line) => observer.next(line))
-    lineReader.on("close", () => observer.complete())
-    observer.add(() => lineReader.close())
-  })
-  return pipeToStreamData(stream$)
+  return record$.pipe(
+    finalize(() => {
+      fileReader.close()
+    })
+  )
 }
 
 export interface TitleBasic {

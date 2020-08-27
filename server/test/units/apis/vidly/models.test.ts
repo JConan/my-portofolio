@@ -13,7 +13,7 @@ describe("Vidly models", () => {
       useCreateIndex: true,
     })
     Models(connection)
-  })
+  }, 120000)
   afterAll(async () => {
     await connection.close()
     await (await server).stop()

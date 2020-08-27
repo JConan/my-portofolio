@@ -15,10 +15,11 @@ describe("Vidly APIs", () => {
     connection = createConnection(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      useCreateIndex: true,
     })
     Models(connection)
     app = express().use(RouteMovies(connection))
-  })
+  }, 120000)
   afterAll(async () => {
     await connection.close()
     await (await server).stop()
