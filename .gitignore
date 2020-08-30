@@ -7,7 +7,7 @@
 .pnp.js
 
 # testing
-sandbox.ts
+sandbox*.ts
 /coverage
 /server/coverage
 
