@@ -76,7 +76,7 @@ class AppBuild {
             scriptSrc: ["'self'", "'unsafe-inline'"],
             styleSrc: ["'self'", "'unsafe-inline'"],
             imgSrc: [
-              "self",
+              "'self'",
               "data:",
               "localhost:5000",
               "https://joch-portofolio.herokuapp.com/",
