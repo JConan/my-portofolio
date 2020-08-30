@@ -14,7 +14,7 @@ interface IResourceMovie {
 const mappingMovieResources = (m: MovieDoc): IResourceMovie => ({
   id: String(m._id),
   title: m.title,
-  genre: m.genres.join(","),
+  genre: m.genres.map((genre) => genre.name).join(","),
   rate: m.averageRate,
   stock: m.stock,
 })

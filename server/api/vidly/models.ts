@@ -30,7 +30,7 @@ const MovieSchema: Schema = new Schema({
   title: { type: String, required: true },
   year: { type: Number },
   duration: { type: Number },
-  genres: [{ type: Types.ObjectId, ref: GenreSchema }],
+  genres: [{ type: Types.ObjectId, ref: "genre" }],
   stock: { type: Number },
   averageRate: { type: Number },
   totalVotes: { type: Number },
