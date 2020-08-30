@@ -2,7 +2,7 @@ import { Connection } from "mongoose"
 import Models from "@:api.vidly/models"
 
 export default (connection: Connection) => {
-  const { Movie: movie } = Models(connection)
+  const { MovieModel: movie } = Models(connection)
   return {
     async getMovies() {
       return await movie.find().exec()

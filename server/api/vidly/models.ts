@@ -1,23 +1,25 @@
 import { Schema, Document, Connection, Types, Model } from "mongoose"
 
-export interface Movie {
+export interface IMovie {
   tconst: string
   title: string
   year: number
   duration?: number
-  genres: string[]
+  genres: Array<IGenre>
   stock?: number
   averageRate?: number
   totalVotes?: number
 }
 
-export interface Genre {
+export interface IGenre {
   name: string
 }
 
-export interface MovieDoc extends Movie, Document {}
+export interface MovieDoc extends IMovie, Document {
+  genres: Array<GenreDoc>
+}
 
-export interface GenreDoc extends Genre, Document {}
+export interface GenreDoc extends IGenre, Document {}
 
 const GenreSchema: Schema = new Schema({
   name: { type: String, required: true, unique: true },
@@ -34,20 +36,23 @@ const MovieSchema: Schema = new Schema({
   totalVotes: { type: Number },
 })
 
+export type MovieModelType = Model<MovieDoc>
+export type GenreModelType = Model<GenreDoc>
+
 var vidlyModels: {
-  Movie: Model<MovieDoc>
-  Genre: Model<GenreDoc>
+  MovieModel: Model<MovieDoc>
+  GenreModel: Model<GenreDoc>
 }
-export const InitializeModels = (connection: Connection) => {
+export const initializeModels = (connection: Connection) => {
   connection.model("movie", MovieSchema)
   connection.model("genre", GenreSchema)
   vidlyModels = {
-    Movie: connection.model("movie"),
-    Genre: connection.model("genre"),
+    MovieModel: connection.model("movie"),
+    GenreModel: connection.model("genre"),
   }
   return vidlyModels
 }
-export const MovieModel = () => vidlyModels.Movie
-export const GenreModel = () => vidlyModels.Genre
+export const MovieModel = () => vidlyModels.MovieModel
+export const GenreModel = () => vidlyModels.GenreModel
 
-export default InitializeModels
+export default initializeModels

@@ -1,5 +1,5 @@
-import { Configs, getAppConfig } from "@:lib/db";
-import mongoose, { ConnectionOptions } from "mongoose";
+import { Configs, getAppConfig } from "@:lib/db"
+import mongoose, { ConnectionOptions } from "mongoose"
 
 const defaultOptions: ConnectionOptions = {
   useCreateIndex: true,
@@ -7,7 +7,7 @@ const defaultOptions: ConnectionOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   keepAliveInitialDelay: 30000,
-};
+}
 
 const configs: Configs = {
   portofolio: {
@@ -28,14 +28,17 @@ const configs: Configs = {
       },
     },
   },
-};
+  local: {
+    uri: process.env.LOCAL_DB_URI || "",
+  },
+}
 
 export const getAppConnection = (appname: string) => {
-  const config = getAppConfig(appname, configs, defaultOptions);
-  return mongoose.createConnection(config.uri, config.options);
-};
+  const config = getAppConfig(appname, configs, defaultOptions)
+  return mongoose.createConnection(config.uri, config.options)
+}
 
 export default {
   getAppConnection,
   configs,
-};
+}

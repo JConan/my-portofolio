@@ -1,11 +1,20 @@
 import { createWriteStream, mkdirSync, createReadStream } from "fs"
 import Axios from "axios"
 import { Readable } from "stream"
-import { Observable, concat, Subject, combineLatest } from "rxjs"
+import { Subject, Observable, NEVER } from "rxjs"
 import { createInterface } from "readline"
 import { createGunzip } from "zlib"
-import { take, map, withLatestFrom, skip, filter, finalize } from "rxjs/operators"
-import _ from "lodash"
+import {
+  take,
+  map,
+  withLatestFrom,
+  skip,
+  flatMap,
+  distinct,
+  bufferWhen,
+  scan,
+} from "rxjs/operators"
+import { GenreModelType, MovieModelType, IGenre } from "@:api.vidly/models"
 
 export const sources = {
   names: "https://datasets.imdbws.com/name.basics.tsv.gz",
@@ -39,38 +48,36 @@ export const downloadFile = async (url: string) => {
   })
 }
 
-export interface DataLine {
-  [name: string]: string
-}
+export type DataLine<T = string> = Record<T extends string ? string : keyof T, string>
 
-export const createDataStream = (path: string) => {
-  const readerInput = new Subject<string>()
-  const readerInput$ = readerInput.pipe(map((line) => line.split("\t")))
-  const header$ = readerInput$.pipe(take(1))
-  const record$ = readerInput$.pipe(
-    skip(1),
-    withLatestFrom(header$),
-    map((data) => {
-      const keys = data[1]
-      const fields = data[0]
-      const lineData: DataLine = {}
-      for (var i = 0; i < keys.length; i++) {
-        lineData[keys[i]] = fields[i]
-      }
-      return lineData as Record<string, string>
+export const createDataStream = (path: string) =>
+  new Observable<DataLine>((observer) => {
+    const readerInput = new Subject<string>()
+    const readerInput$ = readerInput.pipe(map((line) => line.split("\t")))
+    const header$ = readerInput$.pipe(take(1))
+    const record$ = readerInput$.pipe(
+      skip(1),
+      withLatestFrom(header$),
+      map((data) => {
+        const keys = data[1]
+        const fields = data[0]
+        return fields.reduce((rows, value, index) => {
+          rows[keys[index]] = value
+          return rows
+        }, {} as DataLine)
+      })
+    )
+
+    const fileReader = createInterface(createReadStream(path).pipe(createGunzip()))
+    fileReader.on("line", (line) => readerInput.next(line))
+    fileReader.on("close", () => readerInput.complete())
+
+    observer.add(() => fileReader.close())
+    record$.subscribe({
+      next: (data) => observer.next(data),
+      complete: () => observer.complete(),
     })
-  )
-
-  const fileReader = createInterface(createReadStream(path).pipe(createGunzip()))
-  fileReader.on("line", (line) => readerInput.next(line))
-  fileReader.on("close", () => readerInput.complete())
-
-  return record$.pipe(
-    finalize(() => {
-      fileReader.close()
-    })
-  )
-}
+  })
 
 export interface TitleBasic {
   tconst: string
@@ -85,17 +92,19 @@ export interface TitleBasic {
 
 export const createTitleBasicStream = (path: string) =>
   createDataStream(path).pipe(
-    map<DataLine, TitleBasic>((dataLine) => ({
-      tconst: dataLine.tconst,
-      titleType: dataLine.titleType,
-      primaryTitle: dataLine.primaryTitle,
-      isAdult: dataLine.isAdult === "1",
-      startYear: dataLine.startYear === "\\N" ? undefined : parseInt(dataLine.startYear),
-      endYear: dataLine.endYear === "\\N" ? undefined : parseInt(dataLine.endYear),
-      runtimeMinutes:
-        dataLine.runtimeMinutes === "\\N" ? undefined : parseInt(dataLine.runtimeMinutes),
-      genres: dataLine.genres === "\\N" ? [] : [...dataLine.genres.split(",")],
-    }))
+    map(
+      (dataLine: DataLine<TitleBasic>): TitleBasic => ({
+        tconst: dataLine.tconst,
+        titleType: dataLine.titleType,
+        primaryTitle: dataLine.primaryTitle,
+        isAdult: dataLine.isAdult === "1",
+        startYear: dataLine.startYear === "\\N" ? undefined : parseInt(dataLine.startYear),
+        endYear: dataLine.endYear === "\\N" ? undefined : parseInt(dataLine.endYear),
+        runtimeMinutes:
+          dataLine.runtimeMinutes === "\\N" ? undefined : parseInt(dataLine.runtimeMinutes),
+        genres: dataLine.genres === "\\N" ? [] : [...dataLine.genres.split(",")],
+      })
+    )
   )
 
 export interface TitleRating {
@@ -106,9 +115,102 @@ export interface TitleRating {
 
 export const createTitleRatingStream = (path: string) =>
   createDataStream(path).pipe(
-    map<DataLine, TitleRating>((dataLine) => ({
+    map<DataLine<TitleRating>, TitleRating>((dataLine) => ({
       tconst: dataLine.tconst,
       averageRating: parseFloat(dataLine.averageRating),
       numVotes: parseFloat(dataLine.numVotes),
     }))
   )
+
+export const importGenres = (genreModel: GenreModelType, basic$: Observable<TitleBasic>) => {
+  return new Promise<Array<IGenre & { _id: string }>>(async (resolve) => {
+    const genreNames = await basic$
+      .pipe(
+        map((basic) => basic.genres),
+        flatMap((x) => x),
+        distinct(),
+        bufferWhen(() => NEVER)
+      )
+      .toPromise()
+
+    const bulkDatas = genreNames.map((name) => ({ insertOne: { document: { name } } }))
+
+    genreModel.bulkWrite(bulkDatas).then(({ insertedIds }) => {
+      const genreDatas = genreNames.reduce((allData, genreName, idx) => {
+        allData.push({ name: genreName, _id: String(insertedIds[idx]) })
+        return allData
+      }, new Array<IGenre & { _id: string }>())
+
+      resolve(genreDatas)
+    })
+  })
+}
+
+export const importMovieDatas = (
+  movieModel: MovieModelType,
+  genreDoc: Array<IGenre & { _id: string }>,
+  basic$: Observable<TitleBasic[]>
+) => {
+  return new Promise<{ insertedCount: number }>(async (resolve) => {
+    const result = await basic$
+      .pipe(
+        map((titles) =>
+          titles.map((title) => ({
+            tconst: title.tconst,
+            title: title.primaryTitle,
+            year: title.startYear,
+            duration: title.runtimeMinutes,
+            genres: title.genres.map((genre) => genreDoc.find((doc) => doc.name === genre)),
+          }))
+        ),
+        map((movies) =>
+          movieModel.bulkWrite(movies.map((movie) => ({ insertOne: { document: movie } })))
+        ),
+        flatMap((x) => x),
+        scan(
+          (allResult, current) => ({
+            insertedCount: allResult.insertedCount + current.insertedCount!,
+          }),
+          { insertedCount: 0 } as { insertedCount: number }
+        )
+      )
+      .toPromise()
+    resolve(result)
+  })
+}
+
+export const importMovieRatingDatas = (
+  movieModel: MovieModelType,
+  rating$: Observable<TitleRating[]>
+) => {
+  return new Promise<{ modifiedCount: number }>(async (resolve) => {
+    const result = await rating$
+      .pipe(
+        map((ratings) =>
+          ratings.map((rating) => ({
+            tconst: rating.tconst,
+            averageRate: rating.averageRating,
+            totalVotes: rating.numVotes,
+          }))
+        ),
+        map((ratings) =>
+          movieModel.bulkWrite(
+            ratings.map((rating) => {
+              const { tconst, ...scores } = rating
+              return { updateOne: { filter: { tconst }, update: scores, hint: "tconst_1" } }
+            })
+          )
+        ),
+        flatMap((x) => x),
+        scan(
+          (allResult, current) => ({
+            modifiedCount: allResult.modifiedCount + current.modifiedCount!,
+          }),
+          { modifiedCount: 0 } as { modifiedCount: number }
+        )
+      )
+      .toPromise()
+
+    resolve(result)
+  })
+}
